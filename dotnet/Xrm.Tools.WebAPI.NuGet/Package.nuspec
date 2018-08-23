@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Xrm.Tools.CRMWebAPI</id>
+    <id>Xrm.Tools.CRMWebAPI.UB</id>
     <version>1.0.18</version>
-    <title>Xrm.Tools.CRMWebAPI</title>
-    <authors>DavidYack</authors>
+    <title>Xrm.Tools.CRMWebAPI.UB</title>
+    <authors>unitedbankers</authors>
     <owners></owners>
     <description>
       This is an API helper for working with Dynamics 365 Web API
+	  (fork from https://github.com/davidyack/Xrm.Tools.CRMWebAPI )
      
     </description>
     <releaseNotes>
@@ -36,10 +37,10 @@
       This is an API helper for working with Dynamics 365 Web API
     </summary>
     <language>en-US</language>
-    <projectUrl>https://github.com/davidyack/Xrm.Tools.CRMWebAPI</projectUrl>
+    <projectUrl>https://github.com/unitedbankers/Xrm.Tools.CRMWebAPI.UB.git</projectUrl>
     <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <licenseUrl>https://github.com/davidyack/Xrm.Tools.CRMWebAPI/blob/master/LICENSE</licenseUrl>
+    <licenseUrl>https://github.com/unitedbankers/Xrm.Tools.CRMWebAPI.UB.git/blob/master/LICENSE</licenseUrl>
     <copyright>Copyright  2017</copyright>
     <dependencies>
         <group targetFramework="net40">
