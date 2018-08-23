@@ -32,6 +32,8 @@
       1.0.17 fixed ExecuteFunction serialization of object parameters, 
              GetList by type honor formatted values option
       1.0.18 added support for Entity Change Tracking
+      1.0.19 Fixed FetchXML when other params, fix for mixed case org url, Config as a param 
+      1.0.20 Fixed parsing of entityid on create, added aggregate support
     </releaseNotes>
     <summary>
       This is an API helper for working with Dynamics 365 Web API
@@ -41,7 +43,7 @@
     <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>https://github.com/unitedbankers/Xrm.Tools.CRMWebAPI.UB.git/blob/master/LICENSE</licenseUrl>
-    <copyright>Copyright  2017</copyright>
+    <copyright>Copyright  2018</copyright>
     <dependencies>
         <group targetFramework="net40">
           <dependency id="Newtonsoft.Json" version="8.0.2" />
