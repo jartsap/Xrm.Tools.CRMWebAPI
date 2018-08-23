@@ -121,6 +121,14 @@ namespace Xrm.Tools.WebAPI
             var nextLink = values["@odata.nextLink"];
             while (nextLink != null)
             {
+                var nextLinkUri = new Uri((string)nextLink);
+                string pathQuery = nextLinkUri.PathAndQuery;
+                string host = nextLink.ToString().Replace(pathQuery, "");
+                var apiUri = new Uri(_apiUrl);
+                string apiQuery = apiUri.PathAndQuery;
+                string apiHost = _apiUrl.ToString().Replace(apiQuery, "");
+                nextLink = ((string)nextLink).Replace(host, apiHost);
+                
                 var nextResults = await _httpClient.GetAsync(nextLink.ToString());
                 EnsureSuccessStatusCode(nextResults);
                 var nextData = await nextResults.Content.ReadAsStringAsync();
@@ -134,6 +142,54 @@ namespace Xrm.Tools.WebAPI
 
             return resultList;
         }
+
+        public async Task<Tuple<CRMGetListResult<ExpandoObject>, string>> GetList(string uri, bool isFullUrl, int maxResultCount, CRMGetListOptions QueryOptions = null)
+        {
+            //Console.WriteLine("GetList URI: " + uri + "      ---   isFullUrl:" + isFullUrl);
+            
+                await CheckAuthToken();
+
+                string fullUrl = isFullUrl ? uri : BuildGetUrl(uri, QueryOptions);
+            fullUrl = fullUrl.Replace("http://", "https://"); //TODO: Clean up later
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("GET"), fullUrl);
+
+                var preferList = new List<string>();
+
+                preferList.Add("odata.maxpagesize=" + maxResultCount);
+
+                if ((QueryOptions != null) && (QueryOptions.FormattedValues))
+                    preferList.Add("odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\"");
+
+                if ((QueryOptions != null) && (QueryOptions.TrackChanges))
+                    preferList.Add("odata.track-changes");
+
+                if (preferList.Count > 0)
+                    request.Headers.Add("Prefer", string.Join(",", preferList));
+
+                var results = await _httpClient.SendAsync(request);
+
+                EnsureSuccessStatusCode(results);
+                var data = await results.Content.ReadAsStringAsync();
+                CRMGetListResult<ExpandoObject> resultList = new CRMGetListResult<ExpandoObject>();
+                resultList.List = new List<ExpandoObject>();
+
+                var values = JObject.Parse(data);
+                var valueList = values["value"].ToList();
+                foreach (var value in valueList)
+                {
+                    if (value == null)
+                    {
+                        Console.WriteLine("Empty value");
+                    }
+                    resultList.List.Add(value.ToObject<ExpandoObject>());
+                }
+
+                var nextLink = values["@odata.nextLink"];
+
+                return new Tuple<CRMGetListResult<ExpandoObject>, string>(resultList, (string)values["@odata.nextLink"]);
+            
+        }
+
         /// <summary>
         /// Retrieve a list of records based on query options
         /// </summary>
@@ -151,6 +207,11 @@ namespace Xrm.Tools.WebAPI
 
             if ((QueryOptions != null) && (QueryOptions.FormattedValues))
                 request.Headers.Add("Prefer", "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\"");
+
+            if (QueryOptions != null && !String.IsNullOrEmpty(QueryOptions.FetchXml))
+                request.Headers.Add("Prefer", "odata.include-annotations=\"Microsoft.Dynamics.CRM.*\"");
+
+            
 
             var results = await _httpClient.SendAsync(request);
             
@@ -171,6 +232,13 @@ namespace Xrm.Tools.WebAPI
 
             while (nextLink != null)
             {
+                var nextLinkUri = new Uri((string)nextLink);
+                string pathQuery = nextLinkUri.PathAndQuery;
+                string host = nextLink.ToString().Replace(pathQuery, "");
+                var apiUri = new Uri(_apiUrl);
+                string apiQuery = apiUri.PathAndQuery;
+                string apiHost = _apiUrl.ToString().Replace(apiQuery, "");
+                nextLink = ((string)nextLink).Replace(host, apiHost);
                 var nextResults = await _httpClient.GetAsync(nextLink.ToString());
                 EnsureSuccessStatusCode(nextResults);
                 var nextData = await nextResults.Content.ReadAsStringAsync();
@@ -285,69 +353,71 @@ namespace Xrm.Tools.WebAPI
      throw new NotImplementedException();
 #elif NETCOREAPP1_0
             throw new NotImplementedException();
+#elif NETCOREAPP2_1
+            throw new NotImplementedException();
 #elif NETSTANDARD1_4
             throw new NotImplementedException();
 #else
+            throw new NotImplementedException();
+            //var httpClient = new HttpClient();
 
-            var httpClient = new HttpClient();
+            //httpClient.DefaultRequestHeaders.Authorization =
+            //   new AuthenticationHeaderValue("Bearer", _AccessToken);
+            //httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            //httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            //var batchid = "batch_" + Guid.NewGuid().ToString();
 
-            httpClient.DefaultRequestHeaders.Authorization =
-               new AuthenticationHeaderValue("Bearer", _AccessToken);
-            httpClient.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-            httpClient.DefaultRequestHeaders.Add("OData-Version", "4.0");
-            var batchid = "batch_" + Guid.NewGuid().ToString();
+            //MultipartContent batchContent = new MultipartContent("mixed", batchid);
+            //var changesetID = "changeset_" + Guid.NewGuid().ToString();
+            //MultipartContent changeSetContent = new MultipartContent("mixed", changesetID);
 
-            MultipartContent batchContent = new MultipartContent("mixed", batchid);
-            var changesetID = "changeset_" + Guid.NewGuid().ToString();
-            MultipartContent changeSetContent = new MultipartContent("mixed", changesetID);
+            //int contentID = 1;
+            //foreach (var data in datalist)
+            //{
+            //    HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, _apiUrl + entityCollection);
 
-            int contentID = 1;
-            foreach (var data in datalist)
-            {
-                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, _apiUrl + entityCollection);
+            //    req.Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+            //    HttpMessageContent content = new HttpMessageContent(req);
+            //    content.Headers.Remove("Content-Type");                
+            //    content.Headers.TryAddWithoutValidation("Content-Type", "application/http");
+            //    content.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
+            //    content.Headers.TryAddWithoutValidation("Content-ID", contentID.ToString());
+            //    contentID++;
+            //    changeSetContent.Add(content);
+            //}
 
-                req.Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpMessageContent content = new HttpMessageContent(req);
-                content.Headers.Remove("Content-Type");                
-                content.Headers.TryAddWithoutValidation("Content-Type", "application/http");
-                content.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
-                content.Headers.TryAddWithoutValidation("Content-ID", contentID.ToString());
-                contentID++;
-                changeSetContent.Add(content);
-            }
+            //batchContent.Add(changeSetContent);
 
-            batchContent.Add(changeSetContent);
+            //HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, _apiUrl + "$batch");
 
-            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, _apiUrl + "$batch");
+            //batchRequest.Content = batchContent;
 
-            batchRequest.Content = batchContent;
+            //var batchstring = await batchRequest.Content.ReadAsStringAsync();
 
-            var batchstring = await batchRequest.Content.ReadAsStringAsync();
+            //var response = await httpClient.SendAsync(batchRequest);
+            //var responseString = response.Content.ReadAsStringAsync();
+            //MultipartMemoryStreamProvider batchStream = await response.Content.ReadAsMultipartAsync(); ;
+            //var changesetStream = batchStream.Contents.FirstOrDefault();
 
-            var response = await httpClient.SendAsync(batchRequest);
-            var responseString = response.Content.ReadAsStringAsync();
-            MultipartMemoryStreamProvider batchStream = await response.Content.ReadAsMultipartAsync(); ;
-            var changesetStream = batchStream.Contents.FirstOrDefault();
-            
-            StreamContent changesetFixedContent = FixupChangeStreamDueToBug(changesetStream);
+            //StreamContent changesetFixedContent = FixupChangeStreamDueToBug(changesetStream);
 
-            var changesetFixedStream = await changesetFixedContent.ReadAsMultipartAsync();
-            CRMBatchResult finalResult = new CRMBatchResult();
-            finalResult.ResultItems = new List<CRMBatchResultItem>();
+            //var changesetFixedStream = await changesetFixedContent.ReadAsMultipartAsync();
+            //CRMBatchResult finalResult = new CRMBatchResult();
+            //finalResult.ResultItems = new List<CRMBatchResultItem>();
 
-            foreach (var responseContent in changesetFixedStream.Contents)
-            {               
-                var fixedREsponseContent = FixupToAddCorrectHttpContentType(responseContent);
-                var individualResponseString = await fixedREsponseContent.ReadAsStringAsync();
-                var indivdualResponse = await fixedREsponseContent.ReadAsHttpResponseMessageAsync();              
-                var idString = indivdualResponse.Headers.GetValues("OData-EntityId").FirstOrDefault();
-                idString = idString.Replace(_apiUrl + entityCollection, "").Replace("(", "").Replace(")", "");
-                CRMBatchResultItem resultItem = new CRMBatchResultItem();
-                resultItem.EntityID = Guid.Parse(idString);
-                finalResult.ResultItems.Add(resultItem);
-            }
+            //foreach (var responseContent in changesetFixedStream.Contents)
+            //{               
+            //    var fixedREsponseContent = FixupToAddCorrectHttpContentType(responseContent);
+            //    var individualResponseString = await fixedREsponseContent.ReadAsStringAsync();
+            //    var indivdualResponse = await fixedREsponseContent.ReadAsHttpResponseMessageAsync();              
+            //    var idString = indivdualResponse.Headers.GetValues("OData-EntityId").FirstOrDefault();
+            //    idString = idString.Replace(_apiUrl + entityCollection, "").Replace("(", "").Replace(")", "");
+            //    CRMBatchResultItem resultItem = new CRMBatchResultItem();
+            //    resultItem.EntityID = Guid.Parse(idString);
+            //    finalResult.ResultItems.Add(resultItem);
+            //}
 
-            return finalResult;
+            //return finalResult;
 #endif
         }
         /// <summary>
@@ -816,7 +886,7 @@ namespace Xrm.Tools.WebAPI
             if (string.IsNullOrEmpty(idString))
                 return Guid.Empty;
 
-            idString = idString.ToLower().Replace(fullUrl.ToLower(), "").Replace("(", "").Replace(")", "");
+            idString = idString.Replace(fullUrl.ToLower(), "").Replace("(", "").Replace(")", "");
 
             var idGuid = Guid.Empty;
             //if alternate key was used to perform an upsert, guid not currently returned
