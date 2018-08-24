@@ -4,6 +4,11 @@
     <TargetFrameworks>netstandard1.4;netstandard2.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>xt.snk</AssemblyOriginatorKeyFile>
+    <PackageId>UB.Xrm.Tools.WebAPI.Standard</PackageId>
+    <Authors>unitedbankers</Authors>
+    <Company>unitedbankers</Company>
+    <Product>UB.Xrm.Tools.WebAPI.Standard</Product>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

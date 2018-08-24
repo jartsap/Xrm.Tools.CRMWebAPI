@@ -2,9 +2,9 @@
 <package >
   <metadata>
     <id>Xrm.Tools.CRMWebAPI.UB</id>
-    <version>1.0.18</version>
+    <version>$version$</version>
     <title>Xrm.Tools.CRMWebAPI.UB</title>
-    <authors>unitedbankers</authors>
+    <authors>$authors$</authors>
     <owners></owners>
     <description>
       This is an API helper for working with Dynamics 365 Web API
@@ -34,6 +34,9 @@
       1.0.18 added support for Entity Change Tracking
       1.0.19 Fixed FetchXML when other params, fix for mixed case org url, Config as a param 
       1.0.20 Fixed parsing of entityid on create, added aggregate support
+	  
+	  UB Fork:
+	  1.0.1 GetList nextLink fixes
     </releaseNotes>
     <summary>
       This is an API helper for working with Dynamics 365 Web API

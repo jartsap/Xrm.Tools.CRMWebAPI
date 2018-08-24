@@ -209,9 +209,21 @@ namespace Xrm.Tools.WebAPI
                     resultList.List.Add(value.ToObject<ExpandoObject>());
                 }
 
-                var nextLink = values["@odata.nextLink"];
+                var nextLink= values["@odata.nextLink"] != null ? values["@odata.nextLink"].ToString() : null ;
+             
 
-                return new Tuple<CRMGetListResult<ExpandoObject>, string>(resultList, (string)values["@odata.nextLink"]);
+                if (!String.IsNullOrEmpty(nextLink))
+                {
+                    var nextLinkUri = new Uri((string)nextLink);
+                    string pathQuery = nextLinkUri.PathAndQuery;
+                    string host = nextLink.ToString().Replace(pathQuery, "");
+                    var apiUri = new Uri(_crmWebAPIConfig.APIUrl);
+                    string apiQuery = apiUri.PathAndQuery;
+                    string apiHost = _crmWebAPIConfig.APIUrl.ToString().Replace(apiQuery, "");
+                    nextLink = ((string)nextLink).Replace(host, apiHost);
+                }
+
+                return new Tuple<CRMGetListResult<ExpandoObject>, string>(resultList, nextLink);
             
         }
 
