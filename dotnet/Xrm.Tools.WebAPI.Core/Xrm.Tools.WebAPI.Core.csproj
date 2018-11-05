@@ -4,7 +4,8 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>xt.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Additional GetList overload with FetchXml as parameter, gets all items defined by FetchXml (paging internally) and utilizes batch request, so that the FetchXml is sent in POST request content instead of URL parameter.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
